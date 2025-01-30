@@ -11,5 +11,9 @@ module "audit_trail_s3_bucket" {
   privileged_principal_arns = [{
     (aws_iam_role.stream.arn) = ["*"] # Only allow the Kinesis Stream role to bucket
   }]
-  privileged_principal_actions = ["s3:*"]
+  privileged_principal_actions = [
+    "s3:PutObject",
+    "s3:GetObject",
+    "s3:ListBucket"
+  ]
 }
