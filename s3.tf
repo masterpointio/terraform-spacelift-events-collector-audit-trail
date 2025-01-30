@@ -1,10 +1,10 @@
 
 module "audit_trail_s3_bucket" {
-  source = "cloudposse/s3-bucket/aws"
+  source  = "cloudposse/s3-bucket/aws"
   version = "4.10.0"
 
-  name = module.this.id
-  s3_object_ownership      = "BucketOwnerEnforced"
+  name                = module.this.id
+  s3_object_ownership = "BucketOwnerEnforced"
 
   lifecycle_configuration_rules = var.s3_lifecycle_configuration_rules
 

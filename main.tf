@@ -1,17 +1,17 @@
 module "courier_label" {
- source  = "cloudposse/label/null"
- version = "0.25.0"
+  source  = "cloudposse/label/null"
+  version = "0.25.0"
 
   attributes = ["courier"]
- context = module.this.context
+  context    = module.this.context
 }
 
 module "stream_label" {
- source  = "cloudposse/label/null"
- version = "0.25.0"
+  source  = "cloudposse/label/null"
+  version = "0.25.0"
 
- attributes = ["stream"]
- context = module.this.context
+  attributes = ["stream"]
+  context    = module.this.context
 }
 
 resource "random_string" "suffix" {
