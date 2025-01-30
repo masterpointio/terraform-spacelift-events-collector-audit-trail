@@ -8,9 +8,9 @@ output "courier_url" {
   value       = local.is_govcloud ? aws_apigatewayv2_stage.this["enabled"].invoke_url : aws_lambda_function_url.courier["enabled"].function_url
 }
 
-output "storage_bucket_name" {
+output "audit_trail_storage_bucket_name" {
   description = "The name for the S3 bucket that stores the events"
-  value       = aws_s3_bucket.storage.id
+  value       = module.audit_trail_s3_bucket.bucket_id
 }
 
 output "stream_name" {
