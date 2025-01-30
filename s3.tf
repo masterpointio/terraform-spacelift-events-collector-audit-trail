@@ -1,42 +1,19 @@
-data "aws_kms_alias" "s3" {
-  name = "alias/aws/s3"
-}
 
-resource "aws_s3_bucket" "storage" {
-  bucket = "spacelift-events-${random_string.suffix.result}"
-}
+module "audit_trail_s3_bucket" {
+  source  = "cloudposse/s3-bucket/aws"
+  version = "4.10.0"
 
-resource "aws_s3_bucket_lifecycle_configuration" "cleanup" {
-  bucket = aws_s3_bucket.storage.id
+  name                = module.this.id
+  s3_object_ownership = "BucketOwnerEnforced"
 
-  rule {
-    id     = "abort-incomplete-multipart-upload"
-    status = "Enabled"
+  lifecycle_configuration_rules = var.s3_lifecycle_configuration_rules
 
-    abort_incomplete_multipart_upload {
-      days_after_initiation = 1
-    }
-  }
-
-  rule {
-    id     = "delete-old-events"
-    status = "Enabled"
-
-    expiration {
-      days = var.events_expiration_days
-    }
-  }
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "storage" {
-  bucket = aws_s3_bucket.storage.id
-
-  rule {
-    bucket_key_enabled = true
-
-    apply_server_side_encryption_by_default {
-      kms_master_key_id = data.aws_kms_alias.s3.arn
-      sse_algorithm     = "aws:kms"
-    }
-  }
+  privileged_principal_arns = [{
+    (aws_iam_role.stream.arn) = ["*"] # Only allow the Kinesis Stream role to bucket
+  }]
+  privileged_principal_actions = [
+    "s3:PutObject",
+    "s3:GetObject",
+    "s3:ListBucket"
+  ]
 }

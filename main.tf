@@ -1,13 +1,17 @@
-locals {
-  courier_name = "spacelift-events-collector-courier-${random_string.suffix.result}"
-  stream_name  = "spacelift-events-collector-stream-${random_string.suffix.result}"
+module "courier_label" {
+  source  = "cloudposse/label/null"
+  version = "0.25.0"
+
+  attributes = ["courier"]
+  context    = module.this.context
 }
 
-resource "random_string" "suffix" {
-  length  = 8
-  lower   = true
-  special = false
-  upper   = false
+module "stream_label" {
+  source  = "cloudposse/label/null"
+  version = "0.25.0"
+
+  attributes = ["stream"]
+  context    = module.this.context
 }
 
 ##################################################
@@ -22,7 +26,7 @@ data "archive_file" "lambda_function" {
 
 resource "aws_lambda_function" "courier" {
   filename         = data.archive_file.lambda_function.output_path
-  function_name    = local.courier_name
+  function_name    = module.courier_label.id
   handler          = "function.handler"
   role             = aws_iam_role.courier.arn
   runtime          = "python${var.python_version}"
@@ -32,25 +36,20 @@ resource "aws_lambda_function" "courier" {
     variables = {
       SECRET  = var.secret
       STREAM  = aws_kinesis_firehose_delivery_stream.stream.name
-      VERBOSE = var.logs_verbose
+      VERBOSE = var.lambda_logs_verbose
     }
   }
-}
-
-moved {
-  from = aws_lambda_function_url.courier
-  to   = aws_lambda_function_url.courier["enabled"]
 }
 
 resource "aws_lambda_function_url" "courier" {
   for_each = local.each_commercial
 
-  authorization_type = "NONE"
+  authorization_type = "NONE" # Lambda function's authorization can only be AWS IAM or NONE. Even though this is a public endpoint, the function first checks `is_signature_valid()` before processing the request.
   function_name      = aws_lambda_function.courier.function_name
 }
 
 resource "aws_iam_role" "courier" {
-  name = local.courier_name
+  name = module.courier_label.id
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -84,8 +83,8 @@ resource "aws_iam_role_policy" "courier" {
 }
 
 resource "aws_cloudwatch_log_group" "courier" {
-  name              = "/aws/lambda/${local.courier_name}"
-  retention_in_days = var.logs_retention_days
+  name              = "/aws/lambda/${module.courier_label.id}"
+  retention_in_days = var.cloudwatch_logs_retention_days
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_basic_execution_role" {
@@ -97,8 +96,8 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution_role" {
 # Stream
 ##################################################
 resource "aws_cloudwatch_log_group" "stream" {
-  name              = "/aws/kinesisfirehose/${local.stream_name}"
-  retention_in_days = var.logs_retention_days
+  name              = "/aws/kinesisfirehose/${module.stream_label.id}"
+  retention_in_days = var.cloudwatch_logs_retention_days
 }
 
 resource "aws_cloudwatch_log_stream" "destination_delivery" {
@@ -108,15 +107,14 @@ resource "aws_cloudwatch_log_stream" "destination_delivery" {
 
 resource "aws_kinesis_firehose_delivery_stream" "stream" {
   destination = "extended_s3"
-  name        = local.stream_name
+  name        = module.stream_label.id
 
   extended_s3_configuration {
     buffering_interval  = var.buffer_interval
     buffering_size      = var.buffer_size
-    bucket_arn          = aws_s3_bucket.storage.arn
+    bucket_arn          = module.audit_trail_s3_bucket.bucket_arn
     error_output_prefix = "error/!{firehose:error-output-type}/"
     compression_format  = "GZIP"
-    kms_key_arn         = data.aws_kms_alias.s3.arn
     prefix              = "year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
     role_arn            = aws_iam_role.stream.arn
 
@@ -134,7 +132,7 @@ resource "aws_kinesis_firehose_delivery_stream" "stream" {
 }
 
 resource "aws_iam_role" "stream" {
-  name = local.stream_name
+  name = module.stream_label.id
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -156,39 +154,6 @@ resource "aws_iam_role_policy" "stream" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "s3:AbortMultipartUpload",
-          "s3:GetBucketLocation",
-          "s3:GetObject",
-          "s3:ListBucket",
-          "s3:ListBucketMultipartUploads",
-          "s3:PutObject"
-        ],
-        Resource = [
-          "arn:aws:s3:::${aws_s3_bucket.storage.bucket}",
-          "arn:aws:s3:::${aws_s3_bucket.storage.bucket}/*"
-        ]
-      },
-      {
-        Effect = "Allow",
-        Action = [
-          "kms:Decrypt",
-          "kms:GenerateDataKey"
-        ],
-        Resource = [
-          data.aws_kms_alias.s3.arn
-        ],
-        Condition = {
-          StringEquals = {
-            "kms:ViaService" = "s3.region.amazonaws.com"
-          },
-          StringLike = {
-            "kms:EncryptionContext:aws:s3:arn" : "arn:aws:s3:::${aws_s3_bucket.storage.bucket}/*"
-          }
-        }
-      },
       {
         Effect = "Allow",
         Action = [

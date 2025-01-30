@@ -1,7 +1,11 @@
+### API GATEWAY AWS RESOURCES
+### THIS IS ONLY RELEVANT FOR GOVCLOUD SINCE GOVCLOUD LAMBDAS DOES NOT HAVE DIRECT URL INVOCATIONS
+### USED TO PLACE API GATEWAY IN FRONT OF THE LAMBDA FUNCTION FOR ADDITIONAL CONTROL
+
 resource "aws_apigatewayv2_api" "this" {
   for_each = local.each_govcloud
 
-  name          = local.courier_name
+  name          = module.courier_label.id
   protocol_type = "HTTP"
 }
 

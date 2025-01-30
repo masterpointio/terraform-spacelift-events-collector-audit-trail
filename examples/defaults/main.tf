@@ -5,5 +5,21 @@ provider "aws" {
 module "collector" {
   source = "../.."
 
-  delete_events_when_destroying_stack = true # Required for the automated tests to succeed
+  namespace  = "mp"
+  name       = "spacelift"
+  attributes = ["audit-trail-events"]
+
+  s3_lifecycle_configuration_rules = [{
+    enabled = true
+    id      = "spacelift-audit-trail-s3-rule"
+    # 6 month retention with no transitions
+    expiration = {
+      days = 180
+    }
+    abort_incomplete_multipart_upload_days = null
+    filter_and                             = null
+    noncurrent_version_expiration          = null
+    noncurrent_version_transition          = null
+    transition                             = null
+  }]
 }
