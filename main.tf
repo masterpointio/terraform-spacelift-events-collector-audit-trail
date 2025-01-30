@@ -14,13 +14,6 @@ module "stream_label" {
   context    = module.this.context
 }
 
-resource "random_string" "suffix" {
-  length  = 8
-  lower   = true
-  special = false
-  upper   = false
-}
-
 ##################################################
 # Courier
 ##################################################
