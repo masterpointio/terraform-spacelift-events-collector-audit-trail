@@ -1,3 +1,5 @@
+# trunk-ignore(trivy/AVD-AWS-0143): False positive
+# trunk-ignore(trivy/AVD-AWS-0132): False positive
 provider "aws" {
   region = "us-east-1"
 }
