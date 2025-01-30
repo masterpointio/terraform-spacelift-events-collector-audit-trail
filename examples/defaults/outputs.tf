@@ -1,4 +1,3 @@
-
 output "courier_url" {
   description = "The HTTP URL endpoint for the courier"
   value       = module.collector.courier_url
