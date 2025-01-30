@@ -24,6 +24,4 @@ module "collector" {
     noncurrent_version_transition          = null
     transition                             = null
   }]
-
-
 }
