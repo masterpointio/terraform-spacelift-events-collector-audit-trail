@@ -1,6 +1,6 @@
 # Spacelift Audit Trail Events Collector with AWS
 
-Terraform module setting up a collector that receives Audit Trail events sent by Spacelift and stores them in AWS S3. This is a fork from [Spacelift's example module](https://github.com/spacelift-io-examples/terraform-aws-spacelift-events-collector).
+Terraform module setting up a collector that receives Audit Trail events sent by Spacelift and stores them in AWS S3. This is a fork from [Spacelift's example module](https://github.com/spacelift-io-examples/terraform-aws-spacelift-events-collector) maintained by Masterpoint.
 
 ## Usage
 
