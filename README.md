@@ -1,12 +1,12 @@
-# Spacelift Events Collector for AWS
+# Spacelift Audit Trail Events Collector with AWS
 
-Terraform module setting up a collector that receives Audit Trail events sent by Spacelift and stores them in AWS S3.
+Terraform module setting up a collector that receives Audit Trail events sent by Spacelift and stores them in AWS S3. This is a fork from [Spacelift's example module](https://github.com/spacelift-io-examples/terraform-aws-spacelift-events-collector).
 
 ## Usage
 
 ```hcl
 module "collector" {
-  source = "github.com/masterpointio/terraform-spacelift-events-collector-audit-trail"
+  source = "git::https://github.com/masterpointio/terraform-spacelift-events-collector-audit-trail.git?ref=v1.0.0"
 
 	# Add inputs described below as needed
 }
@@ -19,6 +19,8 @@ The main resources for this module are:
 - **Courier**: A Lambda function that exposes a URL (see the `courier_url` output) and forwards incoming events to a Kinesis Firehose Delivery Stream.
 - **Stream**: A Kinesis Firehose Delivery Stream that buffers events forwarded by the Courier and eventually sends them in batches to the Storage.
 - **Storage**: An S3 bucket that stores the events (see the `storage_bucket_name` output).
+
+![Spacelift Audit Trail Events Collector with AWS - Lucidchart](https://lucid.app/publicSegments/view/ecfc1313-c639-4ed2-8ca7-2397ebae86fe/image.png)
 
 <!-- BEGIN_TF_DOCS -->
 
