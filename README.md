@@ -4,6 +4,11 @@ Terraform module setting up a collector that receives Audit Trail events sent by
 
 ## Usage
 
+There is no required inputs for this module, but we recommend at least these:
+
+- `s3_lifecycle_configuration_rules` to configure the retention of the data
+- `secret`: IMPORTANT! The Lambda endpoint URL that Spacelift will send events to is publicly accessible, so you should use a secret to protect it. This same secret needs to be set in Spacelift, so when it sends the event to the Lambda endpoint, it will include the secret in the request. The Lambda function will check that the secret is correct before processing the event.
+
 ```hcl
 module "collector" {
   source = "git::https://github.com/masterpointio/terraform-spacelift-events-collector-audit-trail.git?ref=v1.0.0"

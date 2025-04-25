@@ -9,6 +9,8 @@ module "collector" {
   name       = "spacelift"
   attributes = ["audit-trail-events"]
 
+  secret = "some-secret-to-protect-the-lambda-endpoint" # We recommend using a secret manager to store and reference this, such as SOPS.
+
   s3_lifecycle_configuration_rules = [{
     enabled = true
     id      = "spacelift-audit-trail-s3-rule"
