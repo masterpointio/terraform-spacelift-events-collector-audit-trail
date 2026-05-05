@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/masterpointio/terraform-spacelift-events-collector-audit-trail/compare/v1.0.0...v1.0.1) (2026-05-05)
+
+
+### Bug Fixes
+
+* pin GitHub Actions to commit SHAs (INT-326) ([#21](https://github.com/masterpointio/terraform-spacelift-events-collector-audit-trail/issues/21)) ([58528bd](https://github.com/masterpointio/terraform-spacelift-events-collector-audit-trail/commit/58528bdd2e632859579a9ded5748f5e2758ecd12))
+
 ## 1.0.0 (2025-01-30)
 
 
